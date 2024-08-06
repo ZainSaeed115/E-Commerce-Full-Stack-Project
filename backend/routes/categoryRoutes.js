@@ -12,11 +12,11 @@ import
 
 const router=express.Router()
 
-router.route('/').post(verifyJwt,authorized,createCategory)
+router.route('/create').post(verifyJwt,authorized,createCategory)
 router.route('/:categoryId').put(verifyJwt,authorized,updateCategory)
 router.route('/:categoryId').delete(verifyJwt,authorized,deleteCategory);
 router.route('/categories').get(listCategory);
-router.route('/:categoryId').get(readCategoryById)
+router.route('/:categoryId').get(readCategoryById);
 export default router
 
 

@@ -20,7 +20,7 @@ const createCategory=asyncHandler(async (req,res)=>{
         }
 
         const category= await new Category({name}).save();
-        return res.json(name)
+        return res.json(category)
         
        } catch (error) {
         console.log(error)
@@ -33,18 +33,11 @@ const updateCategory=asyncHandler(async (req,res)=>{
   try {
     
      const {name}= req.body;
-     const {categoryId}= req.params.categoryId;
+     const {categoryId}= req.params;
 
-     const category= await Category.findOne(categoryId)
-
-     if(!category){
-        return res.status(404).json({
-            error:"Category not found"
-        })
-     }
 
      const updatedCategory= await Category.findByIdAndUpdate(
-        category._id,
+        categoryId,
         {
             $set:{name}
         },
@@ -52,7 +45,11 @@ const updateCategory=asyncHandler(async (req,res)=>{
             new:true
         }
     )
-
+    if(!updatedCategory){
+        return res.status(404).json({
+            error:"Category not found"
+        })
+     }
     return res.json(updatedCategory)
 
   } catch (error) {
