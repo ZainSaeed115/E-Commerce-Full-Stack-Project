@@ -20,14 +20,20 @@ import userRoutes from "./routes/userRoutes.js"
 import categoryRoutes from "./routes/categoryRoutes.js"
 import productRoutes from "./routes/productRoutes.js"
 import uploadRoutes from "./routes/uploadRoutes.js"
-
+import formidable from "express-formidable";
 app.use("/api/v1/user",userRoutes)
 app.use("/api/v1/category",categoryRoutes)
 app.use("/api/v1/product",productRoutes)
 app.use("/api/v1/upload",uploadRoutes)
+app.use(formidable({
+    multiples: true, // Support multiple files upload
+    uploadDir: "./public/temp", // Directory to save files
+    keepExtensions: true // Keep file extensions
+}));
 
-const __dirname=path.resolve();
-app.use("/uploads",express.static(path.join(__dirname+"/uploads")))
+
+// const __dirname=path.resolve();
+// app.use("/uploads",express.static(path.join(__dirname+"/uploads")))
 
 app.get('/',(req,res)=>{
     res.send("Hello")

@@ -153,6 +153,7 @@ const Navigation = () => {
                    Profile
                   </Link>
                 </li>
+              
                 <li>
                   <Link to='/admin/logOut'
                    className='block px-4 py-2 hover:bg-gray-100'
@@ -163,7 +164,9 @@ const Navigation = () => {
                 </li>
                 </>
               )}
-              <li>
+              {!userInfo.user.isAdmin&&(
+                <>
+                <li>
                   <Link to='/profile' className='block px-4 py-2 hover:bg-gray-200'>
                    Profile
                   </Link>
@@ -176,6 +179,9 @@ const Navigation = () => {
                    Logout
                   </Link>
                 </li>
+                </>
+              )}
+              
           </ul>
         )}
       </div>

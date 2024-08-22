@@ -14,7 +14,7 @@ const generateAccessAndRefreshTokens= async (userId)=>{
  
      return{accessToken,refreshToken}
   } catch (error) {
-    res.status(500).json({
+    return res.status(500).json({
       message:"Something went wrong while generating access and refresh token"
     })
     
@@ -28,7 +28,7 @@ const createUser=asyncHandler(async (req,res)=>{
    
    // check user entered details
    if([userName,email,password].some((field)=>field?.trim()=="")){
-     res.status(400).json({
+     return res.status(400).json({
        message:"All fields are required"
      })
    }
@@ -40,7 +40,7 @@ const createUser=asyncHandler(async (req,res)=>{
    )
 
    if(userExisted){
-    res.status(409).json({
+    return res.status(409).json({
       message:"User Already exist"
     })
    }
@@ -57,7 +57,7 @@ const createUser=asyncHandler(async (req,res)=>{
    const {accessToken,refreshToken}=generateAccessAndRefreshTokens(user)
 
    if(!user){
-      res.status(500).json({
+      return res.status(500).json({
         message:"Something went wrong while creating user"
       })
    }
@@ -65,7 +65,7 @@ const createUser=asyncHandler(async (req,res)=>{
     httpOnly:true,
     secure:true,
   }
-   res
+   return res
    .cookie("accessToken",accessToken,options)
    .cookie("refreshToken",refreshToken,options)
    .status(200).json({
@@ -84,7 +84,7 @@ const userLogin= asyncHandler(async (req,res)=>{
    const {userName,email,password}=req.body
 
    if(!(userName|| email)){
-     res.status(400).json({
+     return res.status(400).json({
       message:"userName or email is required"
      })
    }
@@ -94,7 +94,7 @@ const userLogin= asyncHandler(async (req,res)=>{
    })
 
    if(!user){
-    res.status(400).json(
+    return res.status(400).json(
       {
         message:"User does not exist"
       }
@@ -104,7 +104,7 @@ const userLogin= asyncHandler(async (req,res)=>{
    const isPasswordValid= await user.isPasswordCorrect(password)
 
    if(!isPasswordValid){
-    res.status(401).json({
+    return res.status(401).json({
       message:"Invalid User Credentials"
     })
    }
@@ -164,7 +164,7 @@ const userLoggedOut=asyncHandler(async (req,res)=>{
 // access all user by admin
 const getAllUsers=asyncHandler(async (req,res)=>{
  const users= await User.find({})
- res.json(users)
+ return res.json(users)
 
 })
 
@@ -173,12 +173,12 @@ const getCurrentUserProfile=asyncHandler(async (req,res)=>{
   const user= await User.findById(req.user._id).select("-password -isAdmin")
 
   if(user){
-    res.status(200).json(
+    return res.status(200).json(
       user
   )
   }
   else{
-    res.status(404).json({
+   return res.status(404).json({
       message:"User not found"
     })
   }
@@ -211,7 +211,7 @@ const updateCurrentUserProfile=asyncHandler(async (req,res)=>{
   )
 
   if(!user){
-  res.status(404).
+  return res.status(404).
   json({
     message:"User Not Found",
     UserUpdatedData:{},
@@ -219,7 +219,7 @@ const updateCurrentUserProfile=asyncHandler(async (req,res)=>{
   })
   }
 
-  res.status(200).
+  return res.status(200).
   json({
     message:"User data Updated Successfully",
     user:user,
@@ -241,21 +241,17 @@ const deleteUserById = asyncHandler(async (req, res) => {
     }
 
     await User.deleteOne({ _id: user._id });
-    const options = {
-      httpOnly: true,
-      secure: true,
-    };
+   
     return res.status(200)
-      .clearCookie("accessToken", options)
-      .clearCookie("refreshToken", options)
-      .json({
+       .json({
         message: "User Deleted Successfully",
         success: true
       });
   } else {
     return res.status(404).json({
       message: "User not found",
-      success: false
+      success: false,
+      user
     });
   }
 });

@@ -11,6 +11,7 @@ dotenv.config(
 
 
 const port =process.env.PORT || 8000
+
 app.get((req,res)=>{
     res.send("Hello")
 })
@@ -19,6 +20,7 @@ connectDB()
     ()=>{
         app.listen(port,()=>{
             console.log(`Server running on port:${port}`)
+           
         })
     }
 )

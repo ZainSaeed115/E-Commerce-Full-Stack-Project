@@ -8,12 +8,12 @@ const router= express.Router();
 const storage=multer.diskStorage({
 
     destination:(req,file,cb)=>{
-        cb(null,"uploads/");
+        cb(null,"./public/temp");
     },
 
     filename:(req,file,cb)=>{
         const extname=path.extname(file.originalname)
-        cb(null,`${file.fieldname}-${Date.now()}${extname}`)
+        cb(null,`${file.originalname}-${Date.now()}${extname}`)
     }
 })
 
@@ -42,10 +42,11 @@ router.post('/',(req,res)=>{
         if(err){
             return res.status(400).send({message:err.message})
         }
-        else if(req.file){
+        console.log("Uploaded File Info:", req.file);
+         if(req.file){
             return res.status(200).send({
                 message:"Image uploaded successfully",
-                image:`${req.file.path}`
+                image:`${req.file.filename}`
             })
         }
         else{

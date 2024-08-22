@@ -24,7 +24,11 @@ const UserList = () => {
   const deleteHandler=async (userId)=>{
     if(window.confirm('Are you sure?')){
       try {
-        await deleteUser(userId)
+        const res=await deleteUser(userId)
+         console.log(res)
+        toast.success(`${res.user.userName} is deleted successfully`)
+        refetch();
+       
       } catch (error) {
         toast.error(error?.data.message || error.message)
       }

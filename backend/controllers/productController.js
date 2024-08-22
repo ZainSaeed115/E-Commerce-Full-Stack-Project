@@ -1,45 +1,56 @@
 import asyncHandler from "../middlewares/asyncHandler.js";
 import Product from "../models/productModel.js";
+import { uploadFileOnCloudinary } from "../utils/cloudinary.js";
 
 // add product
-const addProduct=asyncHandler(async (req,res)=>{
- try {
-
-    const {name,description,price,category,quantity,brand,image}=req.fields
-
-    const convertedPrice=parseFloat(price);
-    const convertedQuantity=parseInt(quantity);
-
+const addProduct = asyncHandler(async (req, res) => {
+   try {
+     const { name, description, price, category, quantity, brand } = req.body;
+    
+     console.log("Files Object:", req.files);
+     const imageLocalPath = req.files?.image[0]?.path;
+     console.log("Image Local Path:", imageLocalPath);
+ 
+     const convertedPrice = parseFloat(price);
+     const convertedQuantity = parseInt(quantity);
+ 
      switch (true) {
-      case !name:
-             return res.json({error:"Name is required"})
-      case !description:
-             return res.json({error:"Description is required"});
-      case !convertedPrice:
-            return res.json({error:"Price is required"});
-      case !category:
-          return res.json({error:"Category is required"});
-      case !convertedQuantity:
-         return res.json({error:"Quantity is required"});    
-      case !brand:
-         return res.json({error:"Brand is required"});
-      case !image:
-            return res.json({error:"Image is required"});
+       case !name:
+         return res.status(400).json({ error: "Name is required" });
+       case !description:
+         return res.status(400).json({ error: "Description is required" });
+       case isNaN(convertedPrice):
+         return res.status(400).json({ error: "Valid price is required" });
+       case !category:
+         return res.status(400).json({ error: "Category is required" });
+       case isNaN(convertedQuantity):
+         return res.status(400).json({ error: "Valid quantity is required" });
+       case !brand:
+         return res.status(400).json({ error: "Brand is required" });
+     
      }
-
-     const product= new Product({
-      ...req.fields,
-      price:convertedPrice,
-      quantity:convertedQuantity
-   });
+ 
+     const imageUrl = await uploadFileOnCloudinary(imageLocalPath);
+     console.log(imageUrl)
+     if (!imageUrl) {
+       return res.status(404).json({ error: "Image upload failed" });
+     }
+ 
+     const product = new Product({
+       ...req.body,
+       image: imageUrl.url,
+       price: convertedPrice,
+       quantity: convertedQuantity,
+     });
+ 
      await product.save();
-     return res.status(200).json({product});
-
- } catch (error) {
-    console.error(error)
-    res.status(400).json(error?.message);
- }
-})
+     return res.status(200).json(product);
+   } catch (error) {
+     console.error(error);
+     res.status(500).json({ error: error?.message });
+   }
+ });
+ 
 
 // update product
 
@@ -47,8 +58,8 @@ const updateProductDetails = asyncHandler(async (req, res) => {
 
    try {
       
-      const {name,description,price,category,quantity,brand,image}=req.fields
-
+      const {name,description,price,category,quantity,brand}=req.body
+      const imageLocalPath = req.files?.image[0]?.path;
       const convertedPrice=parseFloat(price);
       const convertedQuantity=parseInt(quantity);
   
@@ -65,10 +76,14 @@ const updateProductDetails = asyncHandler(async (req, res) => {
            return res.json({error:"Quantity is required"});    
         case !brand:
            return res.json({error:"Brand is required"});
-        case !image:
-              return res.json({error:"Image is required"});
+      
        }
+       
+       const imageUrl= await uploadFileOnCloudinary(imageLocalPath);
 
+       if(!imageUrl){
+         return res.status(404).json({ error: "Image upation failed" });
+       }
 
        const product= await Product.findByIdAndUpdate(
          req.params.productId,
@@ -80,7 +95,7 @@ const updateProductDetails = asyncHandler(async (req, res) => {
                category,
                quantity:convertedQuantity,
                brand,
-               image,
+               image:imageUrl.url,
             }
          },
          {
@@ -92,7 +107,7 @@ const updateProductDetails = asyncHandler(async (req, res) => {
          return res.status(404).json({error:"Product Not Found"})
        }
 
-       return res.status(200).json({product})
+       return res.status(200).json({product});
   
    } catch (error) {
       console.error(error)
@@ -112,7 +127,10 @@ const deleteProduct= asyncHandler(async (req,res)=>{
         return  res.status(404).json({error:"Product Not Found"})
       }
 
-       return  res.status(200).json({error:"Product deleted Successfully"})
+       return  res.status(200).json({
+         error:"Product deleted Successfully",
+         product
+       })
    } catch (error) {
       console.error(error)
       res.status(400).json(error?.message);

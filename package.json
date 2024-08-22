@@ -1,6 +1,7 @@
 {
   "dependencies": {
     "bcryptjs": "^2.4.3",
+    "cloudinary": "^2.4.0",
     "concurrently": "^8.2.2",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
@@ -16,12 +17,11 @@
   "name": "e-commercestore",
   "version": "1.0.0",
   "main": "index.js",
-  "type":"module",
-  "devDependencies": {},
+  "type": "module",
   "scripts": {
     "backend": "nodemon backend/index.js ",
-    "frontend":"npm run dev --prefix frontend",
-    "dev":"concurrently \"npm run frontend\" \"npm run backend\""
+    "frontend": "npm run dev --prefix frontend",
+    "dev": "concurrently \"npm run frontend\" \"npm run backend\""
   },
   "keywords": [],
   "author": "",

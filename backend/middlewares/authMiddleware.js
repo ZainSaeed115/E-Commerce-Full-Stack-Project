@@ -13,7 +13,7 @@ const verifyJwt = asyncHandler(async (req, res, next) => {
           })  
         
       }
-  
+     
       console.log("ACCESS_TOKEN_SECRET:", process.env.ACCESS_TOKEN_SECRET); // Add logging
   
       const decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
