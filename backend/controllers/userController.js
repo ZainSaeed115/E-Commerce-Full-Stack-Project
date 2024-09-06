@@ -54,7 +54,7 @@ const createUser=asyncHandler(async (req,res)=>{
    )
 
    const user= await User.findById(userId._id)
-   const {accessToken,refreshToken}=generateAccessAndRefreshTokens(user)
+   const {accessToken,refreshToken}= await generateAccessAndRefreshTokens(user)
 
    if(!user){
       return res.status(500).json({
@@ -230,34 +230,44 @@ const updateCurrentUserProfile=asyncHandler(async (req,res)=>{
 // delete user with id by admin
 
 const deleteUserById = asyncHandler(async (req, res) => {
-  const user = await User.findById(req.params.id);
-
-  if (user) {
+  try {
+    const userId = req.params.id;
+    
+    // Find the user by ID
+    const user = await User.findById(userId);
+  
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+        success: false,
+      });
+    }
+  
     if (user.isAdmin) {
       return res.status(400).json({
         message: "Cannot delete Admin user",
-        success: false
+        success: false,
       });
     }
-
-    await User.deleteOne({ _id: user._id });
-   
-    return res.status(200)
-       .json({
-        message: "User Deleted Successfully",
-        success: true
-      });
-  } else {
-    return res.status(404).json({
-      message: "User not found",
+  
+    // Delete the user only if they are not an admin
+    await User.deleteOne({ _id: userId });
+  
+    return res.status(200).json({
+      message: "User deleted successfully",
+      success: true,
+    });
+  } catch (error) {
+    console.error(error.message);
+    return res.status(500).json({
+      message: "Internal Server Error",
       success: false,
-      user
     });
   }
 });
 
-
 const getUserById=asyncHandler(async (req,res)=>{
+ try {
   const user= await User.findById(req.params.id).select("-password")
 
   if(user){
@@ -268,6 +278,9 @@ const getUserById=asyncHandler(async (req,res)=>{
       message:"User Not Found"
     })
   }
+ } catch (error) {
+   console.error(error?.data?.message)
+ }
 })
 
 // update user by id from admin

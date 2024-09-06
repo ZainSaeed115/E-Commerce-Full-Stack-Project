@@ -33,7 +33,7 @@ router.route("/")
 
 
 router.route("/allProducts").get(fetchAllProducts);
-router.route("/:id/reviews").post(verifyJwt,authorized,checkId,addProductReview);
+router.route("/:id/reviews").post(verifyJwt,checkId,addProductReview);
 router.route("/top").get(fetchTopProducts);
 router.route("/new").get(fetchNewProducts);
 

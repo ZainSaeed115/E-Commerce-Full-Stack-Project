@@ -5,7 +5,7 @@ import { uploadFileOnCloudinary } from "../utils/cloudinary.js";
 // add product
 const addProduct = asyncHandler(async (req, res) => {
    try {
-     const { name, description, price, category, quantity, brand } = req.body;
+     const { name, description, price, category, quantity, brand, countInStock } = req.body;
     
      console.log("Files Object:", req.files);
      const imageLocalPath = req.files?.image[0]?.path;
@@ -13,6 +13,7 @@ const addProduct = asyncHandler(async (req, res) => {
  
      const convertedPrice = parseFloat(price);
      const convertedQuantity = parseInt(quantity);
+     const convertedStock=parseInt(countInStock);
  
      switch (true) {
        case !name:
@@ -27,6 +28,8 @@ const addProduct = asyncHandler(async (req, res) => {
          return res.status(400).json({ error: "Valid quantity is required" });
        case !brand:
          return res.status(400).json({ error: "Brand is required" });
+       case !countInStock:
+         return res.status(400).json({error:"countInStock is required"});
      
      }
  
@@ -41,6 +44,7 @@ const addProduct = asyncHandler(async (req, res) => {
        image: imageUrl.url,
        price: convertedPrice,
        quantity: convertedQuantity,
+       countInStock:convertedStock,
      });
  
      await product.save();
@@ -55,66 +59,49 @@ const addProduct = asyncHandler(async (req, res) => {
 // update product
 
 const updateProductDetails = asyncHandler(async (req, res) => {
-
    try {
-      
-      const {name,description,price,category,quantity,brand}=req.body
-      const imageLocalPath = req.files?.image[0]?.path;
-      const convertedPrice=parseFloat(price);
-      const convertedQuantity=parseInt(quantity);
-  
-       switch (true) {
-        case !name:
-               return res.json({error:"Name is required"})
-        case !description:
-               return res.json({error:"Description is required"});
-        case !convertedPrice:
-              return res.json({error:"Price is required"});
-        case !category:
-            return res.json({error:"Category is required"});
-        case !convertedQuantity:
-           return res.json({error:"Quantity is required"});    
-        case !brand:
-           return res.json({error:"Brand is required"});
-      
+     const { name, description, price, category, quantity, brand, countInStock } = req.body;
+     const imageLocalPath = req.files?.image?.[0]?.path;
+ 
+     if (!Object.keys(req.body).length && !imageLocalPath) {
+       return res.status(400).json({ error: "At least one field is required to update" });
+     }
+ 
+     const updateData = {};
+ 
+     if (name) updateData.name = name;
+     if (description) updateData.description = description;
+     if (price) updateData.price = parseFloat(price);
+     if (category) updateData.category = category;
+     if (quantity) updateData.quantity = parseInt(quantity);
+     if (brand) updateData.brand = brand;
+     if(countInStock) updateData.countInStock=countInStock;
+     
+     if (imageLocalPath) {
+       const imageUrl = await uploadFileOnCloudinary(imageLocalPath);
+       if (!imageUrl) {
+         return res.status(404).json({ error: "Image update failed" });
        }
-       
-       const imageUrl= await uploadFileOnCloudinary(imageLocalPath);
-
-       if(!imageUrl){
-         return res.status(404).json({ error: "Image upation failed" });
-       }
-
-       const product= await Product.findByIdAndUpdate(
-         req.params.productId,
-         {
-            $set:{
-               name,
-               description,
-               price:convertedPrice,
-               category,
-               quantity:convertedQuantity,
-               brand,
-               image:imageUrl.url,
-            }
-         },
-         {
-            new:true
-         }
-       );
-
-       if(!product){
-         return res.status(404).json({error:"Product Not Found"})
-       }
-
-       return res.status(200).json({product});
-  
+       updateData.image = imageUrl.url;
+     }
+ 
+     const product = await Product.findByIdAndUpdate(
+       req.params.productId,
+       { $set: updateData },
+       { new: true }
+     );
+ 
+     if (!product) {
+       return res.status(404).json({ error: "Product Not Found" });
+     }
+ 
+     return res.status(200).json({ product });
    } catch (error) {
-      console.error(error)
-      res.status(400).json(error?.message);
+     console.error(error);
+     res.status(400).json({ error: error?.message });
    }
-} );
-
+ });
+ 
 
 // delete product
 
@@ -244,7 +231,7 @@ const addProductReview =asyncHandler(async (req,res)=>{
       
    } catch (error) {
       console.error(error)
-      res.status(400).json(error?.message);
+      return res.status(400).json(error?.message);
    }
 });
 
