@@ -1,10 +1,10 @@
 
 import {useParams,Link} from "react-router-dom"
-import { useGetProductsQuery } from './redux/api/productApiSlice.js'
-import Loader from './components/Loader.jsx'
-import Header from './components/Header.jsx'
-import Message from './components/Message.jsx'
-import Product from "./pages/Products/Product.jsx"
+import { useGetProductsQuery } from '../redux/api/productApiSlice.js'
+import Loader from '../components/Loader.jsx'
+import Header from '../components/Header.jsx'
+import Message from '../components/Message.jsx'
+import Product from "./Products/Product.jsx"
 
 
 const Home = () => {
@@ -38,7 +38,7 @@ const Home = () => {
 
               <div className="flex justify-center flex-wrap mt-[2rem]">
                  {
-                  data.products.map((product)=>(
+                  data?.products?.map((product)=>(
                     <div key={product._id}>
                       <Product product={product}/>
                     </div>

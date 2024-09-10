@@ -17,7 +17,8 @@ import
     fetchAllProducts,
     addProductReview,
     fetchTopProducts,
-    fetchNewProducts
+    fetchNewProducts,
+    filterProducts
 } from "../controllers/productController.js"
 
 
@@ -36,6 +37,7 @@ router.route("/allProducts").get(fetchAllProducts);
 router.route("/:id/reviews").post(verifyJwt,checkId,addProductReview);
 router.route("/top").get(fetchTopProducts);
 router.route("/new").get(fetchNewProducts);
+router.route("/filtered-products").post(filterProducts);
 
 
 //update and delete product by Id

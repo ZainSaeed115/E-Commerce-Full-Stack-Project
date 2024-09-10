@@ -45,7 +45,7 @@ const HeartIcon = ({product}) => {
         {isFavourite ? (
                 <FaHeart  className="text-red-600 font-bold" />
             ) : (
-                <FaRegHeart className="text-gray-600 font-bold" />
+                <FaRegHeart className="text-white font-bold" />
             )}
     </div>
   )
